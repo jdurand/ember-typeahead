@@ -22,19 +22,38 @@
 
     },
 
+    substringMatcher: function(items) {
+      return function findMatches(q, cb) {
+        var matches, substrRegex;
+        matches = [];
+        substrRegex = new RegExp(q, 'i');
+
+        Ember.$.each(items, function(i, item) {
+          if (substrRegex.test(item.name)) {
+            matches.push(item);
+          }
+        });
+        cb(matches);
+      };
+    },
+
     initializeTypeahead: function(data){
       var _this = this;
       this.typeahead = this.$().typeahead({
-        name: _this.$().attr('id') || "typeahead",
-        limit: this.get("limit") || 5,
-        local: data.map(function(item) {
+        hint: false,
+        highlight: true,
+        minLength: 1
+      },
+      {
+        name: _this.get('name'),
+        displayKey: 'name',
+        source: _this.substringMatcher(data.map(function(item) {
           return {
-            value: item.get(_this.get("name")),
-            name: item.get(_this.get("name")),
-            tokens: [item.get(_this.get("name"))],
+            name: item.get(_this.get('name')),
+            value: item.get(_this.get('value') || _this.get('name')),
             emberObject: item
-          };
-        })
+          }
+        }))
       });
 
       this.typeahead.on("typeahead:selected", function(event, item) {
